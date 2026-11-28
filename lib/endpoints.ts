@@ -24,4 +24,20 @@ export const API_ENDPOINTS = {
   client: {
     companyDetails: "/client/account/company",
   },
+
+  candidate: {
+    profile: "/candidate/onboarding/profile",
+    options: "/candidate/onboarding/options",
+    personal: "/candidate/onboarding/personal",
+    headline: "/candidate/onboarding/headline",
+    experience: "/candidate/onboarding/experience",
+    education: "/candidate/onboarding/education",
+    skills: "/candidate/onboarding/skills",
+    preferences: "/candidate/onboarding/preferences",
+    privacy: "/candidate/onboarding/privacy",
+    photo: "/candidate/onboarding/photo",
+    cv: "/candidate/onboarding/cv",
+    buildCv: "/candidate/onboarding/cv/build",
+    submit: "/candidate/onboarding/submit",
+  },
 } as const;

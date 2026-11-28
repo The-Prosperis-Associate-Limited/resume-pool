@@ -25,7 +25,7 @@ export interface SessionUser {
   has_password: boolean;
   account_status: AccountStatus;
   createdAt: string;
-  candidate_profile: { id: string; status: CandidateProfileStatus } | null;
+  candidate_profile: { id: string; status: CandidateProfileStatus; onboarding_step: string; public_ref: string } | null;
   client_account: { id: string; company: Company | null } | null;
   needs_company_details: boolean;
 }
