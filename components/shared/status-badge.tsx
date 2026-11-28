@@ -22,7 +22,7 @@ export const StatusBadge = function ({ status, className }: Props) {
   return (
     <span
       className={cn(
-        "inline-flex h-6 items-center gap-1.5 rounded-full px-2.5 text-xs font-semibold",
+        "inline-flex h-6 shrink-0 items-center gap-1.5 rounded-full px-2.5 text-xs font-semibold whitespace-nowrap",
         style.box,
         className,
       )}

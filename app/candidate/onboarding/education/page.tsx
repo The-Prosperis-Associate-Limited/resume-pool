@@ -30,6 +30,7 @@ export default function EducationStepPage() {
     control,
     handleSubmit,
     reset,
+    setError,
     formState: { errors },
   } = useForm<EducationValues>({
     resolver: zodResolver(educationSchema),
@@ -59,7 +60,8 @@ export default function EducationStepPage() {
     })),
   }));
 
-  const { save, isPending } = useSaveOnboardingStep<unknown>({
+  const { save, isPending } = useSaveOnboardingStep<unknown, EducationValues>({
+    setError,
     url: API_ENDPOINTS.candidate.education,
     next: nextPath("EDUCATION"),
     onSuccessMessage: "Education saved",

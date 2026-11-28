@@ -92,10 +92,26 @@ export interface Readiness {
   issues: { step: OnboardingStep; message: string }[];
 }
 
+export type ReviewKind = "NEW" | "RESUBMISSION" | "CV_CHANGED" | "DETAILS_CHANGED";
+
+export interface ReviewReason {
+  step: Exclude<OnboardingStep, "REVIEW">;
+  message: string;
+}
+
+export interface CandidateReviewState {
+  kind: ReviewKind;
+  submitted_at: string;
+  decision: "APPROVED" | "REJECTED" | null;
+  reasons: ReviewReason[] | null;
+  decided_at: string | null;
+}
+
 export interface CandidateProfileResponse {
   profile: OwnProfile;
   preview: CandidatePreview;
   readiness: Readiness;
+  review: CandidateReviewState | null;
 }
 
 export interface OnboardingOptions {

@@ -21,6 +21,7 @@ export default function PrivacyStepPage() {
     control,
     handleSubmit,
     reset,
+    setError,
     formState: { errors },
   } = useForm<PrivacyValues>({ resolver: zodResolver(privacySchema), defaultValues: { hidden_companies: [] } });
 
@@ -30,7 +31,8 @@ export default function PrivacyStepPage() {
     hidden_companies: profile.privacy.hidden_companies.map((entry) => entry.name),
   }));
 
-  const { save, isPending } = useSaveOnboardingStep<PrivacyValues>({
+  const { save, isPending } = useSaveOnboardingStep<PrivacyValues, PrivacyValues>({
+    setError,
     url: API_ENDPOINTS.candidate.privacy,
     next: REVIEW_PATH,
     onSuccessMessage: "Privacy settings saved",

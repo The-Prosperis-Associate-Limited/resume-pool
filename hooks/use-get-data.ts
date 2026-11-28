@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useCallback, useEffect } from "react";
+import { useHydrated } from "@/hooks/use-hydrated";
 import api, { type CustomAxiosRequestConfig } from "@/lib/api";
 import { useHandleErrors } from "@/lib/handle-errors";
 
@@ -35,6 +36,7 @@ export const useGetData = <T>({
   retry,
 }: Props): UseGetDataResult<T> => {
   const handleErrors = useHandleErrors();
+  const hydrated = useHydrated();
 
   const queryFn = useCallback(async () => {
     try {
@@ -62,5 +64,6 @@ export const useGetData = <T>({
     if (error && !silentErrors) handleErrors(error);
   }, [error, handleErrors, silentErrors]);
 
-  return { isFetching, data, refetch, error };
+  // A late-hydrating Suspense boundary must render what the server did, even if the cache filled meanwhile.
+  return { isFetching, data: hydrated ? data : undefined, refetch, error };
 };

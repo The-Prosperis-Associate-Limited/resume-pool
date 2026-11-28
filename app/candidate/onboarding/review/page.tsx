@@ -1,16 +1,20 @@
 "use client";
 
-import { AlertCircle, ArrowRight, Pencil } from "lucide-react";
+import { ArrowRight, Pencil } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { AppInput } from "@/components/shared/app-input";
 import { OnboardingShell } from "@/components/onboarding/onboarding-shell";
+import { StepIssueList } from "@/components/onboarding/step-issue-list";
 import { StepActions, StepHeader } from "@/components/onboarding/step-parts";
 import { Stagger, StaggerItem } from "@/components/motion/motion-primitives";
 import { Notice } from "@/components/shared/notice";
 import { useCandidateProfile, useOnboardingOptions } from "@/hooks/use-candidate-profile";
 import { useSubmitData } from "@/hooks/use-submit-data";
+import { errorMessage } from "@/lib/handle-errors";
+import { showToast } from "@/lib/show-toast";
+import type { APIErrorBody } from "@/types/response";
 import { API_ENDPOINTS } from "@/lib/endpoints";
 import {
   AVAILABILITY_LABELS,
@@ -66,13 +70,22 @@ export default function ReviewStepPage() {
   const { data } = useCandidateProfile();
   const options = useOnboardingOptions();
   const [consent, setConsent] = useState(false);
+  const [failures, setFailures] = useState<NonNullable<APIErrorBody["errors"]>>([]);
 
   const { mutate, isPending } = useSubmitData<void>({
     url: API_ENDPOINTS.candidate.submit,
     getBody: () => ({ consent, consent_version: options?.consent.version }),
     onSuccessMessage: "Profile sent for review",
     onSuccess: () => router.replace("/candidate"),
+    onError: (error) => {
+      const body = error.response?.data as APIErrorBody | undefined;
+      if (body?.code === "SUBMIT_STANDARDS_FAILED" && body.errors?.length) return setFailures(body.errors);
+      showToast("error", errorMessage(error));
+    },
   });
+
+  const rejection =
+    data?.profile.status === "REJECTED" && data.review?.decision === "REJECTED" ? data.review.reasons : null;
 
   const issues = data?.readiness.issues ?? [];
   const rows = data ? rowsFor(data.profile) : null;
@@ -85,20 +98,19 @@ export default function ReviewStepPage() {
         lead={`Our team reviews every profile before it goes live, usually ${REVIEW_TURNAROUND}. You'll get an email either way.`}
       />
 
+      <Notice tone="danger" show={!!rejection?.length} className="mb-5">
+        <p className="font-semibold">What our reviewer asked you to change</p>
+        <StepIssueList items={rejection ?? []} />
+      </Notice>
+
+      <Notice tone="danger" show={failures.length > 0} className="mb-5">
+        <p className="font-semibold">Fix these before you submit</p>
+        <StepIssueList items={failures} />
+      </Notice>
+
       <Notice tone="warning" show={issues.length > 0} className="mb-5">
         <p className="font-semibold">A few things to finish first</p>
-        <ul className="mt-1.5 grid gap-1">
-          {issues.map((issue) => (
-            <li key={issue.message}>
-              <Link
-                href={`${ONBOARDING_STEPS.find((entry) => entry.step === issue.step)?.path}?from=review`}
-                className="inline-flex items-center gap-1.5 underline-offset-2 hover:underline"
-              >
-                <AlertCircle className="size-3.5" /> {issue.message}
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <StepIssueList items={issues} />
       </Notice>
 
       {rows && (
@@ -136,7 +148,10 @@ export default function ReviewStepPage() {
         label="Submit for review"
         isLoading={isPending}
         disabled={!consent || issues.length > 0 || !options}
-        onClick={() => mutate()}
+        onClick={() => {
+          setFailures([]);
+          mutate();
+        }}
       />
       <p className="text-muted-foreground mt-3 flex items-center justify-end gap-1 text-xs">
         Your profile stays hidden until it&apos;s approved <ArrowRight className="size-3" />

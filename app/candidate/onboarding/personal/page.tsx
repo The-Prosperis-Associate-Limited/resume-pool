@@ -23,6 +23,7 @@ export default function PersonalStepPage() {
     control,
     handleSubmit,
     reset,
+    setError,
     formState: { errors },
   } = useForm<PersonalValues>({
     resolver: zodResolver(personalSchema),
@@ -37,7 +38,8 @@ export default function PersonalStepPage() {
     city: personal.city ?? "",
   }));
 
-  const { save, isPending } = useSaveOnboardingStep<PersonalValues>({
+  const { save, isPending } = useSaveOnboardingStep<PersonalValues, PersonalValues>({
+    setError,
     url: API_ENDPOINTS.candidate.personal,
     next: nextPath("PERSONAL"),
     onSuccessMessage: "Personal details saved",

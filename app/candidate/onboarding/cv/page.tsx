@@ -14,7 +14,8 @@ import { useCandidateProfile, useOnboardingOptions } from "@/hooks/use-candidate
 import { useSubmitData } from "@/hooks/use-submit-data";
 import { API_ENDPOINTS } from "@/lib/endpoints";
 import { SPRING } from "@/lib/motion";
-import { formatBytes, nextPath, ONBOARDING_STEPS, REVIEW_PATH } from "@/lib/onboarding";
+import { returnPath } from "@/hooks/use-save-onboarding-step";
+import { formatBytes, nextPath, ONBOARDING_STEPS } from "@/lib/onboarding";
 import { showToast } from "@/lib/show-toast";
 import { cn } from "@/lib/utils";
 
@@ -41,8 +42,7 @@ export default function CvStepPage() {
   const build = useSubmitData<void>({ url: API_ENDPOINTS.candidate.buildCv, onSuccessMessage: "Your CV is ready" });
 
   const standards = options?.standards.cv;
-  const next = () =>
-    router.push(new URLSearchParams(window.location.search).get("from") === "review" ? REVIEW_PATH : nextPath("CV"));
+  const next = () => router.push(returnPath(nextPath("CV")));
 
   return (
     <OnboardingShell step="CV">

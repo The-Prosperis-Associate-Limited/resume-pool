@@ -3,8 +3,8 @@
 import { LogOut, Menu, type LucideIcon } from "lucide-react";
 import { AnimatePresence, LayoutGroup, motion } from "motion/react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useSelectedLayoutSegment } from "next/navigation";
+import { Suspense, useState } from "react";
 import { AppSheet } from "@/components/shared/app-sheet";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { Logo } from "@/components/shared/logo";
@@ -19,6 +19,7 @@ export interface NavItem {
   label: string;
   href: string;
   icon: LucideIcon;
+  count?: number;
 }
 
 export interface NavSection {
@@ -32,6 +33,13 @@ interface Props {
   tone?: "light" | "dark";
   children: React.ReactNode;
 }
+
+const sectionOf = (href: string, home: string) => (href === home ? null : href.slice(home.length + 1).split("/")[0]);
+
+// The segment is runtime data on dynamic routes, so each reader sits in its own Suspense boundary.
+const CurrentSegment = function ({ children }: { children: (segment: string | null) => React.ReactNode }) {
+  return children(useSelectedLayoutSegment());
+};
 
 const initials = (first: string | null, last: string | null, email: string) =>
   ((first?.[0] ?? "") + (last?.[0] ?? "") || email[0]).toUpperCase();
@@ -88,70 +96,92 @@ const Sidebar = function ({
   onSignOut: () => void;
   scope: string;
 }) {
-  const pathname = usePathname();
   const dark = tone === "dark";
+
+  const nav = (segment: string | null | undefined) => (
+    <LayoutGroup id={scope}>
+      <motion.nav
+        variants={stagger(0.05, 0.05)}
+        initial="hidden"
+        animate="show"
+        className="grid flex-1 content-start gap-5"
+      >
+        {sections.map((section) => (
+          <motion.div key={section.label} variants={fadeUp} className="grid gap-1">
+            <p
+              className={cn(
+                "px-3 text-[11px] font-bold tracking-wider uppercase",
+                dark ? "text-white/45" : "text-faint",
+              )}
+            >
+              {section.label}
+            </p>
+            {section.items.map(({ label, href, icon: Icon, count }) => {
+              const active = sectionOf(href, home) === segment;
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  onClick={onNavigate}
+                  className={cn(
+                    "relative flex items-center gap-2.5 rounded-full px-3 py-2 text-sm font-semibold transition-colors",
+                    active
+                      ? dark
+                        ? "text-white"
+                        : "text-primary"
+                      : dark
+                        ? "text-white/70 hover:bg-white/8"
+                        : "text-ink-2 hover:bg-muted",
+                  )}
+                >
+                  {active && (
+                    <motion.span
+                      layoutId="nav-active"
+                      transition={SPRING}
+                      className={cn("absolute inset-0 rounded-full", dark ? "bg-white/12" : "bg-brand-50")}
+                    />
+                  )}
+                  <Icon className="relative size-4.5" />
+                  <span className="relative flex-1">{label}</span>
+                  {!!count && (
+                    <motion.span
+                      key={count}
+                      initial={{ scale: 0.6, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={SPRING}
+                      className={cn(
+                        "relative min-w-6 rounded-full px-1.5 text-center text-[11px] leading-5 font-bold tabular-nums",
+                        dark
+                          ? active
+                            ? "text-brand-900 bg-teal-300"
+                            : "bg-white/10 text-white/90"
+                          : "bg-brand-50 text-brand-700",
+                      )}
+                    >
+                      {count}
+                    </motion.span>
+                  )}
+                </Link>
+              );
+            })}
+          </motion.div>
+        ))}
+      </motion.nav>
+    </LayoutGroup>
+  );
 
   return (
     <div className={cn("flex h-full flex-col gap-6 p-4", dark ? "bg-brand-900 text-white" : "bg-white")}>
       <Logo href={home} tone={tone} className="px-2 pt-1" />
-      <LayoutGroup id={scope}>
-        <motion.nav
-          variants={stagger(0.05, 0.05)}
-          initial="hidden"
-          animate="show"
-          className="grid flex-1 content-start gap-5"
-        >
-          {sections.map((section) => (
-            <motion.div key={section.label} variants={fadeUp} className="grid gap-1">
-              <p
-                className={cn(
-                  "px-3 text-[11px] font-bold tracking-wider uppercase",
-                  dark ? "text-white/45" : "text-faint",
-                )}
-              >
-                {section.label}
-              </p>
-              {section.items.map(({ label, href, icon: Icon }) => {
-                const active = pathname === href;
-                return (
-                  <Link
-                    key={href}
-                    href={href}
-                    onClick={onNavigate}
-                    className={cn(
-                      "relative flex items-center gap-2.5 rounded-full px-3 py-2 text-sm font-semibold transition-colors",
-                      active
-                        ? dark
-                          ? "text-white"
-                          : "text-primary"
-                        : dark
-                          ? "text-white/70 hover:bg-white/8"
-                          : "text-ink-2 hover:bg-muted",
-                    )}
-                  >
-                    {active && (
-                      <motion.span
-                        layoutId="nav-active"
-                        transition={SPRING}
-                        className={cn("absolute inset-0 rounded-full", dark ? "bg-white/12" : "bg-brand-50")}
-                      />
-                    )}
-                    <Icon className="relative size-4.5" />
-                    <span className="relative">{label}</span>
-                  </Link>
-                );
-              })}
-            </motion.div>
-          ))}
-        </motion.nav>
-      </LayoutGroup>
+      <Suspense fallback={nav(undefined)}>
+        <CurrentSegment>{nav}</CurrentSegment>
+      </Suspense>
       <UserChip tone={tone} onSignOut={onSignOut} />
     </div>
   );
 };
 
 export const SurfaceShell = function ({ sections, home, tone = "light", children }: Props) {
-  const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [confirmSignOut, setConfirmSignOut] = useState(false);
   const { signOut, isSigningOut } = useSignOut();
@@ -186,11 +216,17 @@ export const SurfaceShell = function ({ sections, home, tone = "light", children
       </AppSheet>
 
       <main className="min-w-0 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div key={pathname} variants={fadeUp} initial="hidden" animate="show" exit="exit">
-            {children}
-          </motion.div>
-        </AnimatePresence>
+        <Suspense fallback={<Skeleton className="h-60 rounded-2xl" />}>
+          <CurrentSegment>
+            {(segment) => (
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div key={segment ?? "home"} variants={fadeUp} initial="hidden" animate="show" exit="exit">
+                  {children}
+                </motion.div>
+              </AnimatePresence>
+            )}
+          </CurrentSegment>
+        </Suspense>
       </main>
 
       <ConfirmDialog

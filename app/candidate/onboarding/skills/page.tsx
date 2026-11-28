@@ -27,6 +27,7 @@ export default function SkillsStepPage() {
     control,
     handleSubmit,
     reset,
+    setError,
     formState: { errors },
   } = useForm<SkillsValues>({
     resolver: zodResolver(skillsSchema),
@@ -42,7 +43,8 @@ export default function SkillsStepPage() {
       : [{ name: "English", level: "FLUENT" }],
   }));
 
-  const { save, isPending } = useSaveOnboardingStep<SkillsValues>({
+  const { save, isPending } = useSaveOnboardingStep<SkillsValues, SkillsValues>({
+    setError,
     url: API_ENDPOINTS.candidate.skills,
     next: nextPath("SKILLS"),
     onSuccessMessage: "Skills saved",

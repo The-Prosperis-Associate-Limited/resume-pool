@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { Logo } from "@/components/shared/logo";
+import { Notice } from "@/components/shared/notice";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCandidateProfile } from "@/hooks/use-candidate-profile";
@@ -75,12 +76,14 @@ export const OnboardingShell = function ({ step, children }: Props) {
       ? total
       : ONBOARDING_STEPS.findIndex((entry) => entry.step === data.profile.onboarding_step)
     : 0;
-  const locked = !!data && data.profile.status !== "UNSUBMITTED" && data.profile.status !== "REJECTED";
+  const status = data?.profile.status;
+  const locked = status === "PENDING" || status === "REMOVED";
+  const editingListed = status === "LIVE" || status === "PAUSED" || status === "HIRED";
   const router = useRouter();
 
   useEffect(() => {
-    if (locked) router.replace("/candidate");
-  }, [locked, router]);
+    if (locked || (editingListed && step === "REVIEW")) router.replace("/candidate");
+  }, [locked, editingListed, step, router]);
   const percent = Math.round((Math.min(currentIndex + 1, total) / total) * 100);
 
   return (
@@ -152,7 +155,10 @@ export const OnboardingShell = function ({ step, children }: Props) {
                 )}
               >
                 {reachable && !now ? (
-                  <Link href={entry.path} className="flex gap-3 rounded-lg transition-opacity hover:opacity-80">
+                  <Link
+                    href={editingListed ? `${entry.path}?from=profile` : entry.path}
+                    className="flex gap-3 rounded-lg transition-opacity hover:opacity-80"
+                  >
                     {body}
                   </Link>
                 ) : (
@@ -164,7 +170,7 @@ export const OnboardingShell = function ({ step, children }: Props) {
             );
           })}
           <li className="text-muted-foreground relative">
-            {reached >= total && !locked ? (
+            {reached >= total && !locked && !editingListed ? (
               <Link
                 href={REVIEW_PATH}
                 className={cn("flex items-center gap-3 text-sm", step === "REVIEW" && "text-brand-700 font-bold")}
@@ -206,6 +212,12 @@ export const OnboardingShell = function ({ step, children }: Props) {
             animate="show"
             className="rounded-[18px] border bg-white p-5 shadow-xs sm:p-8"
           >
+            {editingListed && step !== "REVIEW" && (
+              <Notice tone="warning" className="mb-5">
+                Your profile is in the pool. Changing your CV, headline, experience or education takes it out until a
+                reviewer checks it again. Skills, preferences and privacy change straight away.
+              </Notice>
+            )}
             {children}
           </motion.main>
         </div>

@@ -1,10 +1,11 @@
 "use client";
 
-import { ArrowRight, Clock, FileCheck2, Hourglass, PenLine } from "lucide-react";
+import { ArrowRight, Clock, FileCheck2, Hourglass, PenLine, Pencil } from "lucide-react";
 import Link from "next/link";
 import { ProfileBuilderArt, ReviewQueueArt } from "@/components/illustrations/empty-art";
 import { Stagger, StaggerItem } from "@/components/motion/motion-primitives";
 import { CandidatePreviewCard, PreviewLabel } from "@/components/onboarding/candidate-preview-card";
+import { StepIssueList } from "@/components/onboarding/step-issue-list";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -46,15 +47,19 @@ const Hero = function ({ data }: { data: CandidateProfileResponse }) {
   }
 
   if (profile.status === "PENDING") {
+    const changed = data.review?.kind === "CV_CHANGED" || data.review?.kind === "DETAILS_CHANGED";
     return (
       <div className="flex flex-col gap-5 rounded-2xl border bg-white p-6 sm:flex-row sm:items-center sm:p-7">
         <ReviewQueueArt className="size-24 shrink-0" />
         <div className="min-w-0 flex-1">
           <StatusBadge status="PENDING" />
-          <h1 className="mt-2.5 text-2xl font-extrabold tracking-tight">Your profile is with our reviewers</h1>
+          <h1 className="mt-2.5 text-2xl font-extrabold tracking-tight">
+            {changed ? "Your changes are with our reviewers" : "Your profile is with our reviewers"}
+          </h1>
           <p className="text-muted-foreground mt-1">
-            We check every profile and CV by hand, usually {REVIEW_TURNAROUND}. We&apos;ll email you the moment
-            it&apos;s live, or tell you exactly what to change.
+            {changed
+              ? `You changed your ${data.review?.kind === "CV_CHANGED" ? "CV" : "core details"}, so your profile is out of the pool until a reviewer checks it, usually ${REVIEW_TURNAROUND}.`
+              : `We check every profile and CV by hand, usually ${REVIEW_TURNAROUND}. We'll email you the moment it's live, or tell you exactly what to change.`}
           </p>
           <ul className="text-ink-2 [&_svg]:text-primary mt-4 grid gap-2 text-sm [&_li]:flex [&_li]:items-center [&_li]:gap-2.5 [&_svg]:size-4">
             <li>
@@ -85,8 +90,13 @@ const Hero = function ({ data }: { data: CandidateProfileResponse }) {
         <StatusBadge status="REJECTED" />
         <h1 className="mt-2.5 text-2xl font-extrabold tracking-tight">Your profile needs a few changes</h1>
         <p className="text-muted-foreground mt-1">
-          Fix what our reviewers flagged and resubmit. It goes straight back into the queue.
+          Fix what our reviewer flagged and resubmit. It goes straight back into the queue.
         </p>
+        {!!data.review?.reasons?.length && (
+          <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-950">
+            <StepIssueList items={data.review.reasons} />
+          </div>
+        )}
         <Button asChild className="mt-5 h-11 rounded-xl px-5">
           <Link href="/candidate/onboarding/review">
             <PenLine /> Fix my profile
@@ -99,10 +109,32 @@ const Hero = function ({ data }: { data: CandidateProfileResponse }) {
   return (
     <div className="rounded-2xl border bg-white p-6 sm:p-7">
       <StatusBadge status={profile.status} />
-      <h1 className="mt-2.5 text-2xl font-extrabold tracking-tight">Hello, {name}</h1>
+      <h1 className="mt-2.5 text-2xl font-extrabold tracking-tight">
+        {profile.status === "LIVE" ? `You're in the pool, ${name}` : `Hello, ${name}`}
+      </h1>
       <p className="text-muted-foreground mt-1">
-        Your dashboard with views, unlocks and who unlocked you is on its way.
+        Companies can find your anonymised profile as {profile.public_ref}. Views, unlocks and who unlocked you arrive
+        on this page soon.
       </p>
+      {profile.status !== "REMOVED" && (
+        <div className="mt-5">
+          <p className="text-sm font-bold">Edit your profile</p>
+          <p className="text-muted-foreground text-[13px]">
+            Changing your CV, headline, experience or education sends your profile back for a quick review.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {ONBOARDING_STEPS.map((entry) => (
+              <Link
+                key={entry.step}
+                href={`${entry.path}?from=profile`}
+                className="text-ink-2 hover:border-brand-600/50 hover:text-brand-700 inline-flex h-9 items-center gap-1.5 rounded-full border bg-white px-3.5 text-[13px] font-semibold transition-colors"
+              >
+                <Pencil className="size-3.5" /> {entry.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

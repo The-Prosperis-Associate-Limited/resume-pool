@@ -25,6 +25,7 @@ export default function PreferencesStepPage() {
     control,
     handleSubmit,
     reset,
+    setError,
     formState: { errors },
   } = useForm<PreferencesValues>({
     resolver: zodResolver(preferencesSchema),
@@ -47,7 +48,8 @@ export default function PreferencesStepPage() {
     open_to_relocate: preferences.open_to_relocate,
   }));
 
-  const { save, isPending } = useSaveOnboardingStep<unknown>({
+  const { save, isPending } = useSaveOnboardingStep<unknown, PreferencesValues>({
+    setError,
     url: API_ENDPOINTS.candidate.preferences,
     next: nextPath("PREFERENCES"),
     onSuccessMessage: "Preferences saved",

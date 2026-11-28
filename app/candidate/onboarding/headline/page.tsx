@@ -22,6 +22,7 @@ export default function HeadlineStepPage() {
     control,
     handleSubmit,
     reset,
+    setError,
     formState: { errors },
   } = useForm<HeadlineValues>({
     resolver: zodResolver(headlineSchema),
@@ -34,7 +35,8 @@ export default function HeadlineStepPage() {
     target_roles: headline.target_roles,
   }));
 
-  const { save, isPending } = useSaveOnboardingStep<HeadlineValues>({
+  const { save, isPending } = useSaveOnboardingStep<HeadlineValues, HeadlineValues>({
+    setError,
     url: API_ENDPOINTS.candidate.headline,
     next: nextPath("HEADLINE"),
     onSuccessMessage: "Headline saved",

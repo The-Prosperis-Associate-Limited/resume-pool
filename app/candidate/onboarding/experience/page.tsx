@@ -36,6 +36,7 @@ export default function ExperienceStepPage() {
     control,
     handleSubmit,
     reset,
+    setError,
     formState: { errors },
   } = useForm<ExperienceValues>({
     resolver: zodResolver(experienceSchema),
@@ -65,7 +66,8 @@ export default function ExperienceStepPage() {
         : [EMPTY_ROLE],
   }));
 
-  const { save, isPending } = useSaveOnboardingStep<unknown>({
+  const { save, isPending } = useSaveOnboardingStep<unknown, ExperienceValues>({
+    setError,
     url: API_ENDPOINTS.candidate.experience,
     next: nextPath("EXPERIENCE"),
     onSuccessMessage: "Work experience saved",

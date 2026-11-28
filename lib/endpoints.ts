@@ -40,4 +40,12 @@ export const API_ENDPOINTS = {
     buildCv: "/candidate/onboarding/cv/build",
     submit: "/candidate/onboarding/submit",
   },
+
+  admin: {
+    reviews: "/admin/reviews",
+    reviewSummary: "/admin/reviews/summary",
+    review: (profileId: string) => `/admin/reviews/${profileId}`,
+    reviewCv: (profileId: string) => `/admin/reviews/${profileId}/cv`,
+    reviewCvHtml: (profileId: string) => `/admin/reviews/${profileId}/cv/html`,
+  },
 } as const;
