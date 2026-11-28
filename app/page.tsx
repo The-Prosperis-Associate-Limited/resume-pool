@@ -1,5 +1,6 @@
 import { FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 export default function Home() {
@@ -15,7 +16,7 @@ export default function Home() {
             <p className="text-muted-foreground text-xs font-semibold">by Prosperis</p>
           </div>
           <Badge className="ml-auto" variant="secondary">
-            Phase 0
+            Phase 1
           </Badge>
         </div>
         <h1 className="mt-8 text-3xl font-extrabold tracking-tight">Foundation is in place.</h1>
@@ -23,7 +24,14 @@ export default function Home() {
           Next.js, Tailwind, shadcn/ui, TanStack Query and the data hooks are wired up. The landing page is built in
           phase 9, from the mockup in <code className="font-mono text-sm">design/</code>.
         </p>
-        <Button className="mt-8">Get started</Button>
+        <div className="mt-8 flex flex-wrap gap-3">
+          <Button asChild>
+            <Link href="/auth/signup">Create an account</Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="/auth/signin">Sign in</Link>
+          </Button>
+        </div>
       </div>
     </main>
   );

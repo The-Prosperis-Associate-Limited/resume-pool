@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={cn("h-full antialiased", jakarta.variable, geistMono.variable)}>
-      <body className="bg-page flex min-h-full flex-col font-sans">
+      <body className="bg-page flex min-h-full flex-col font-sans" suppressHydrationWarning>
         <AppProvider>{children}</AppProvider>
       </body>
     </html>

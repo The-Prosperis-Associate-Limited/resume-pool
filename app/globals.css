@@ -15,6 +15,11 @@
   --color-brand-700: var(--brand-700);
   --color-brand-900: var(--brand-900);
   --color-highlight: var(--highlight);
+  --color-art-glow: var(--art-glow);
+  --color-art-mint: var(--art-mint);
+  --color-art-muted: var(--art-muted);
+  --color-ink-2: var(--ink-2);
+  --color-faint: var(--faint);
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -85,6 +90,11 @@
   --brand-700: #115e59;
   --brand-900: #0a2f2c;
   --highlight: #f59e0b;
+  --art-glow: #5eead4;
+  --art-mint: #99f6e4;
+  --art-muted: #b8e8df;
+  --ink-2: #334155;
+  --faint: #94a3b8;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: #0f766e;
@@ -138,5 +148,25 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+@layer components {
+  .auth-art {
+    background:
+      radial-gradient(700px 400px at 100% 0%, color-mix(in srgb, var(--art-glow) 28%, transparent), transparent 60%),
+      radial-gradient(500px 300px at 0% 100%, color-mix(in srgb, var(--highlight) 18%, transparent), transparent 60%),
+      linear-gradient(160deg, var(--brand-700), var(--brand-900) 70%);
+  }
+  .auth-art::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgb(255 255 255 / 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(255 255 255 / 0.06) 1px, transparent 1px);
+    background-size: 40px 40px;
+    mask-image: radial-gradient(ellipse at 60% 40%, #000, transparent 70%);
+    pointer-events: none;
   }
 }
