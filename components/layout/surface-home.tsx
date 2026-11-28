@@ -9,12 +9,13 @@ interface Props {
   art: React.ReactNode;
   emptyTitle: string;
   emptyDescription: string;
+  emptyAction?: React.ReactNode;
   greeting: (firstName: string) => string;
   lead: string;
 }
 
 // Each surface's landing until its phase builds the real one.
-export const SurfaceHome = function ({ art, emptyTitle, emptyDescription, greeting, lead }: Props) {
+export const SurfaceHome = function ({ art, emptyTitle, emptyDescription, emptyAction, greeting, lead }: Props) {
   const { user } = useSession();
 
   return (
@@ -30,7 +31,7 @@ export const SurfaceHome = function ({ art, emptyTitle, emptyDescription, greeti
         <p className="text-muted-foreground mt-1.5">{lead}</p>
       </StaggerItem>
       <StaggerItem>
-        <EmptyState art={art} title={emptyTitle} description={emptyDescription} />
+        <EmptyState art={art} title={emptyTitle} description={emptyDescription} action={emptyAction} />
       </StaggerItem>
     </Stagger>
   );

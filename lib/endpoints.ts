@@ -25,6 +25,11 @@ export const API_ENDPOINTS = {
     companyDetails: "/client/account/company",
   },
 
+  pool: {
+    candidates: "/pool/candidates",
+    candidate: (ref: string) => `/pool/candidates/${encodeURIComponent(ref)}`,
+  },
+
   candidate: {
     profile: "/candidate/onboarding/profile",
     options: "/candidate/onboarding/options",

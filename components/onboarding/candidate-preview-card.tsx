@@ -31,7 +31,7 @@ export const CandidatePreviewCard = function ({ preview, status, showHiddenList 
         {preview.headline || preview.target_roles[0] || <span className="text-faint">Your headline</span>}
       </p>
       <p className="text-muted-foreground text-sm">
-        {[preview.certifications[0], preview.qualifications[0]?.qualification].filter(Boolean).join(" · ") ||
+        {[preview.certifications[0]?.name, preview.qualifications[0]?.qualification].filter(Boolean).join(" · ") ||
           "Qualifications appear here"}
       </p>
       <ul className="text-ink-2 [&_svg]:text-faint my-3.5 grid gap-1.5 text-[13px] [&_li]:flex [&_li]:items-center [&_li]:gap-2 [&_svg]:size-3.5">

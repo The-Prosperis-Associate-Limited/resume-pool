@@ -41,6 +41,13 @@ export default function proxy(request: NextRequest) {
     return signedIn ? redirectTo(HOME_FOR_ROLE[sessionType]) : NextResponse.next();
   }
 
+  // A signed-in company browses inside its workspace, where the pool is filtered for the companies candidates hide from.
+  if (signedIn && sessionType === "CLIENT" && (pathname === "/pool" || pathname.startsWith("/pool/"))) {
+    const url = new URL(pathname.replace(/^\/pool/, "/dashboard/search"), request.url);
+    url.search = request.nextUrl.search;
+    return NextResponse.redirect(url);
+  }
+
   if (pathname.startsWith("/admin")) return gate("ADMIN");
   if (pathname.startsWith("/candidate")) return gate("CANDIDATE");
   if (CLIENT_ONLY.some((path) => pathname.startsWith(path))) return gate("CLIENT");
@@ -50,5 +57,5 @@ export default function proxy(request: NextRequest) {
 
 // "/" and the pool are public, so they are not matched.
 export const config = {
-  matcher: ["/auth/:path*", "/admin/:path*", "/candidate/:path*", "/dashboard/:path*", "/company-details"],
+  matcher: ["/auth/:path*", "/admin/:path*", "/candidate/:path*", "/dashboard/:path*", "/company-details", "/pool/:path*"],
 };

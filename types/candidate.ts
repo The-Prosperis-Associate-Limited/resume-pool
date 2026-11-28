@@ -71,11 +71,13 @@ export interface OwnProfile {
 export interface CandidatePreview {
   public_ref: string;
   is_live: boolean;
+  listed_at: string | null;
+  is_new: boolean;
   headline: string | null;
   summary: string | null;
   target_roles: string[];
   months_experience: number;
-  roles: { title: string; is_current: boolean; months: number }[];
+  roles: { title: string; is_current: boolean; months: number; achievements: string | null }[];
   location: { state: string | null; city: string | null; open_to_relocate: boolean };
   salary: { min: number; max: number; currency: string; period: string } | null;
   availability: Availability | null;
@@ -83,7 +85,7 @@ export interface CandidatePreview {
   work_modes: WorkMode[];
   skills: string[];
   qualifications: { qualification: string; field_of_study: string | null }[];
-  certifications: string[];
+  certifications: { name: string; issuer: string | null }[];
   languages: { name: string; level: LanguageLevel }[];
 }
 

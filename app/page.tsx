@@ -29,6 +29,9 @@ export default function Home() {
             <Link href="/auth/signup">Create an account</Link>
           </Button>
           <Button asChild variant="outline">
+            <Link href="/pool">Browse talent</Link>
+          </Button>
+          <Button asChild variant="outline">
             <Link href="/auth/signin">Sign in</Link>
           </Button>
         </div>
